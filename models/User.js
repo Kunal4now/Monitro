@@ -16,13 +16,8 @@ const userSchema = new Schema({
     },
     websites: [
         {
-            url: {
-                type: String,
-                required: true
-            },
-            stats: {
-                type: Object
-            }
+            type: mongoose.Types.ObjectId,
+            ref: 'Website'
         }
     ]
 })
