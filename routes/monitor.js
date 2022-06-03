@@ -3,6 +3,7 @@ const router = express.Router()
 const axios = require('axios')
 const mailWrapper = require('../services/email')
 const User = require('../models/User')
+const Website = require('../models/Website')
 const fetchuser = require('../middleware/fetchUser')
 
 const website = process.env.SITE
@@ -22,7 +23,7 @@ router.get('/monitor', fetchuser, async (req, res) => {
         return Promise.reject(err)
     })  
 
-    const sites = await User.findOne({_id: req.user.id}).select('websites')
+    const sites = await User.findOne({_id: req.user.id}).populate('websites').select('websites')
     let site = sites.websites.map((doc) => {return doc.url})
 
     monitor = async (website) => {
@@ -52,9 +53,13 @@ router.get('/monitor', fetchuser, async (req, res) => {
 
     const result = await Promise.all(promises)
 
-    result.forEach((element) => {
+    result.forEach(async (element) => {
         if (!element.sucess) {
-            // User.find
+            const url = element.url
+            delete element.url
+            await Website.findOneAndUpdate({url: url}, {
+                $push: {stats: element}
+            })
         }
     })
 
