@@ -10,5 +10,5 @@ router.get('/show/:id', fetchuser, websiteController.findAll)
 router.post('/remove/:id', fetchuser, websiteController.deleteOne)
 
 router.get('/allsites', fetchuser, websiteController.findAllRegistered)
-
+ 
 module.exports = router

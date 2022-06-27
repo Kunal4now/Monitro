@@ -8,7 +8,7 @@ app.use(morgan('dev'))
 app.use(express.json())
 
 app.use('/api/auth', require('./routes/auth'))
-app.use('/api', require('./routes/monitor'))
+app.use('/api/monitor', require('./routes/monitor'))
 app.use('/api/website', require('./routes/website'))
 
 const PORT = process.env.PORT

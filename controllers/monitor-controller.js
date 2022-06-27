@@ -1,6 +1,7 @@
 const axios = require('axios')
 const mailWrapper = require('../services/email')
 const Website = require('../models/Website')
+const User = require('../models/User')
 
 let sendMail = (website, reciever) => {
     const data = {
@@ -9,9 +10,9 @@ let sendMail = (website, reciever) => {
 		subject: 'Your Website Just went down',
 		text: `Please check your website ${website} has gone down`
 	};
-    mailWrapper(reciever).messages().send(data, function (error, body) {
+    mailWrapper.mg.messages().send(data, function (error, body) {
         if (error) {
-            res.status(500).json(error)
+            console.log(error)
         }
     });
 }
@@ -32,22 +33,29 @@ exports.monitor = async (req, res) => {
     })  
 
     const sites = await Website.find()
-    let site = sites.map((doc) => {return doc.url})
+    // const sites = await User.findOne({_id: req.user.id}).populate('websites').select('websites')
+    let site = sites.map((doc) => {
+        return {
+            id: doc._id,
+            url: doc.url
+        }
+    })
 
     monitor = async (website) => {
         try {
-            const response = await axios.get(website).then((response) => {
+            const response = await axios.get(website.url).then((response) => {
                 return response
             })
             return obj = {
-                url: website,
+                url: website.url,
                 time: new Date(),
                 sucess: true,
                 responseDuration: response.duration
             }
         } catch(error) {
             return obj = {
-                url: website,
+                id: website.id,
+                url: website.url,
                 time: new Date(),
                 sucess: false
             }
@@ -68,7 +76,11 @@ exports.monitor = async (req, res) => {
             await Website.findOneAndUpdate({url: url}, {
                 $push: {stats: element}
             })
-            sendMail(element.url, req.user.email)
+            const registeredUsers = await User.find({website: element.id}).select('email')
+            registeredUsers.forEach((user) => {
+                console.log(user.email)
+                sendMail(element.url, user.email)
+            })
         }
     })      
 
