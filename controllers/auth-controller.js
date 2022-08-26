@@ -59,14 +59,12 @@ exports.login = async (req, res) => {
         const authToken = jwt.sign(data, JWT_SECRET);
         res.json({authToken: authToken, success: true})
     } catch(error) {
-        console.log(error.message)
         res.status(500).send("Internal Server Error")
     }
 }
 
 exports.fetchUser = async (req, res) => {
     try {
-        console.log(req.user)
         userId = req.user.id;
         const user = await User.findById(userId).select('-password');
         res.send(user);

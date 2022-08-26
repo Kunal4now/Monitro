@@ -72,15 +72,12 @@ exports.monitor = async (req, res) => {
     result.forEach(async (element) => {
         if (!element.sucess) {
             const url = element.url
-            // delete element.url                                           
-            console.log(element)
             await Website.findOneAndUpdate({url: url}, {
                 $push: {stats: element}
             })
             const registeredUsers = await User.find({website: element.id}).select('email')
             registeredUsers.forEach((user) => {
-                // console.log(user.email)
-                // sendMail(element.url, user.email)
+                sendMail(element.url, user.email)
             })
         }
     })      
